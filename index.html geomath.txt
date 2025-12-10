@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Geomath</title>
+<link rel="icon" href="data:," />
+<style>
+:root{--bg:#fafafa;--card:#fff;--text:#121212;--accent1:#b91c1c;--accent2:#ef4444;--muted:#6b7280;--gray:#9ca3af}
+body.dark{--bg:#0b0b0c;--card:#111215;--text:#e6e6e6;--accent1:#f87171;--accent2:#ef9a9a;--muted:#9aa0a6}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);transition:background .2s,color .2s}
+header{background:linear-gradient(90deg,var(--accent1),#7f1d1d);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+header h1{margin:0;font-size:18px}
+header .right{display:flex;gap:8px;align-items:center}
+.btn{border:0;padding:8px 12px;border-radius:8px;cursor:pointer;background:var(--card);color:var(--accent1);font-weight:600}
+.btn.primary{background:var(--accent1);color:#fff}
+nav{display:flex;gap:8px;justify-content:center;padding:10px;background:linear-gradient(180deg,rgba(0,0,0,0.02),transparent);position:sticky;top:56px;z-index:49}
+nav button{background:transparent;border:0;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--text);font-weight:600}
+main.container{max-width:1120px;margin:18px auto;padding:0 16px}
+.card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 8px 18px rgba(2,6,23,0.06);margin-bottom:14px}
+.grid-2{display:grid;grid-template-columns:1fr 420px;gap:14px}
+label{display:block;margin-top:8px;color:var(--muted);font-size:13px}
+select,input[type=number],input[type=text],textarea{padding:8px;border-radius:8px;border:1px solid #eee;width:100%;font-size:14px}
+.small{color:var(--muted);font-size:13px}
+footer{text-align:center;color:var(--muted);padding:12px;font-size:13px}
+.hidden{display:none}
+.flex{display:flex;gap:8px;align-items:center}
+.steps{background:#f8fafc;border-radius:8px;padding:10px;margin-top:8px;font-size:13px}
+.example{background:#fff7f7;border-left:6px solid var(--accent1);padding:10px;border-radius:8px;margin-top:8px}
+.three-canvas{width:100%;height:360px;border-radius:8px;background:#fff;display:block}
+svg{width:100%;height:340px;border-radius:8px;background:linear-gradient(180deg,#fff,#fff);display:block}
+@media(max-width:980px){.grid-2{grid-template-columns:1fr}.three-canvas{height:300px}svg{height:300px}}
+</style>
+</head>
+<body>
+
+<header>
+<div>
+<h1>📐 Geomath</h1>
+<div class="small">Desain merah–abu minimalis • Interaktif • Semua bangun datar & ruang</div>
+</div>
+<div class="right">
+<button id="themeBtn" class="btn">🌙</button>
+<button id="repeatBtn" class="btn">🔊 Ulangi</button>
+</div>
+</header>
+
+<nav>
+<button data-page="home">🏠 Home</button>
+<button data-page="materi">📘 Materi</button>
+<button data-page="hitung">🧮 Hitung</button>
+<button data-page="praktik">✍️ Latihan</button>
+<button data-page="kuis">🧩 Kuis (50)</button>
+<button data-page="referensi">📚 Referensi</button>
+</nav>
+
+<main class="container">
+
+<!-- HOME -->
+<section id="home" class="card">
+<h2 style="margin:0;color:var(--accent1)">Selamat datang — Geomath</h2>
+<p class="small" style="margin-top:8px">Platform pembelajaran geometri interaktif: materi lengkap 2D & 3D, kalkulator langkah, latihan, dan kuis 50 soal. Semua progres disimpan otomatis di browser.</p>
+
+<div class="grid-2" style="margin-top:12px">
+<div>
+<div class="card">
+<h3 style="margin-top:0;color:var(--accent1)">Ringkasan Fitur</h3>
+<ul class="small">
+<li>Bangun datar: ilustrasi 2D langsung di materi (draggable).</li>
+<li>Bangun ruang: ilustrasi 3D sederhana langsung di materi (rotasi & zoom).</li>
+<li>Kalkulator & latihan dengan langkah, penyimpanan otomatis (silent).</li>
+<li>Kuis 50 soal (nilai muncul setelah klik Periksa Jawaban).</li>
+</ul>
+</div>
+</div>
+
+<div>
+<div class="card">
+<h3 style="margin:0 0 8px 0">Preview</h3>
+<div id="preview" class="card" style="padding:12px;text-align:center">
+<div class="small">Contoh ilustrasi 2D/3D pada materi — buka tab Materi untuk melihat langsung.</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- MATERI -->
+<section id="materi" class="card hidden">
+<h2 style="color:var(--accent1);margin:0 0 8px 0">Materi — Bangun Datar & Bangun Ruang</h2>
+
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+<label>Pilih kategori:</label>
+<select id="materiCat">
+<option value="datar">Bangun Datar</option>
+<option value="ruang">Bangun Ruang</option>
+</select>
+
+<label style="margin-left:8px">Pilih bangun:</label>
+<select id="materiSelect" style="min-width:240px"></select>
+</div>
+
+<div class="grid-2" style="margin-top:12px">
+<div>
+<div id="materiBox" class="card" style="max-height:560px;overflow:auto"></div>
+</div>
+
+<div>
+<div class="card">
+<h4 style="margin:0 0 8px 0">Ilustrasi Interaktif</h4>
+<!-- For datar: SVG shown. For ruang: WebGL canvas shown. -->
+<div id="materiVisual" style="min-height:340px"></div>
+<div class="small" style="margin-top:8px">Bangun datar: 2D draggable. Bangun ruang: 3D rotasi & zoom.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- HITUNG -->
+<section id="hitung" class="card hidden">
+<h2 style="color:var(--accent1);margin:0 0 8px 0">Hitung — Kalkulator (Langkah)</h2>
+<div class="grid-2">
+<div>
+<label>Pilih Bangun:</label>
+<select id="calcShape">
+<optgroup label="Bangun Datar">
+<option value="persegi">Persegi</option>
+<option value="persegiPanjang">Persegi Panjang</option>
+<option value="segitiga">Segitiga</option>
+<option value="jajargenjang">Jajar Genjang</option>
+<option value="belahketupat">Belah Ketupat</option>
+<option value="trapesium">Trapesium</option>
+<option value="lingkaran">Lingkaran</option>
+<option value="sektor">Sektor</option>
+</optgroup>
+<optgroup label="Bangun Ruang">
+<option value="kubus">Kubus</option>
+<option value="balok">Balok</option>
+<option value="prisma">Prisma Segitiga</option>
+<option value="limas">Limas Segitiga</option>
+<option value="silinder">Silinder</option>
+<option value="kerucut">Kerucut</option>
+<option value="bola">Bola</option>
+</optgroup>
+</select>
+
+<div id="calcInputs" class="card" style="margin-top:12px"></div>
+
+<div style="margin-top:10px" class="flex">
+<button id="calcBtn" class="btn primary">Hitung</button>
+<button id="resetShapes" class="btn">Reset Input</button>
+<button id="showSteps" class="btn">Tunjukkan Langkah</button>
+</div>
+
+<div id="calcResult" class="card hidden" style="margin-top:12px">
+<h3 style="margin:0 0 8px 0">Hasil & Penjelasan</h3>
+<div id="calcArea">—</div>
+<div id="calcPerim">—</div>
+<div id="calcVol">—</div>
+<div id="calcSteps" class="steps hidden"></div>
+<p class="small" id="calcNote"></p>
+</div>
+</div>
+
+<div>
+<div class="card">
+<h3 style="margin:0 0 8px 0">Ilustrasi (Preview)</h3>
+<div id="calcVisual"></div>
+<div class="small" style="margin-top:8px">Preview 2D/3D sesuai bangun yang dipilih.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- PRAKTIK -->
+<section id="praktik" class="card hidden">
+<h2 style="color:var(--accent1);margin:0 0 8px 0">Latihan Langkah</h2>
+<div class="card">
+<label>Pilih Soal Latihan:</label>
+<select id="latihanSelect">
+<option value="t1">Segitiga: Luas dari alas & tinggi</option>
+<option value="t2">Persegi Panjang: Hitung luas</option>
+<option value="t3">Silinder: Volume dari r & t</option>
+</select>
+
+<div style="margin-top:12px" id="latihanBox"></div>
+</div>
+</section>
+
+<!-- KUIS -->
+<section id="kuis" class="card hidden">
+<h2 style="color:var(--accent1);margin:0 0 8px 0">Kuis — 50 Soal (Isian Singkat)</h2>
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div class="small">Soal <span id="qIdx">0</span> / <span id="qTot">50</span></div>
+<div style="display:flex;gap:8px">
+<button id="startQuiz" class="btn primary">Mulai Ulang Kuis</button>
+<button id="prevQ" class="btn">Sebelumnya</button>
+<button id="nextQ" class="btn">Simpan & Lanjut</button>
+<button id="periksa" class="btn">Periksa Jawaban</button>
+<button id="resetQuizProgress" class="btn">Reset Progres</button>
+</div>
+</div>
+
+<div style="margin-top:12px">
+<div id="questionArea" style="font-weight:700"></div>
+<input id="qAnswer" type="text" placeholder="Tulis jawaban (angka saja)" style="margin-top:8px;padding:8px;border-radius:8px;border:1px solid #eee;width:100%">
+</div>
+
+<div id="quizResults" class="card hidden" style="margin-top:12px">
+<h3 style="margin:0 0 8px 0">Hasil Kuis</h3>
+<div id="scoreSummary"></div>
+<div id="perQuestionFeedback" style="margin-top:8px"></div>
+</div>
+</div>
+</section>
+
+<!-- REFERENSI -->
+<section id="referensi" class="card hidden">
+<h2 style="color:var(--accent1);margin:0 0 8px 0">Referensi & Download</h2>
+<div class="card small">
+<p>Berikut referensi materi yang bisa diunduh:</p>
+<ul>
+<li><a href="https://share.google/QqtpnBYv5ohSxGI6i" target="_blank">Matematika_BS_KLS_IX.pdf</a></li>
+<li><a href="https://repositori.kemendikdasmen.go.id/13174/1/3.Geometri%20Datar%20dan%20Ruang%20di%20SD.pdf" target="_blank">Geometri Datar dan Ruang di SD (Kemendikdasmen)</a></li>
+</ul>
+</div>
+</section>
+
+</main>
+
+<footer>© 2025 Geomath — dibuat untuk pembelajaran interaktif</footer>
+
+<script>
+/* ================= Utilities & Navigation ================= */
+function qs(s){return document.querySelector(s)}
+function qsa(s){return Array.from(document.querySelectorAll(s))}
+function speak(t){ if(!t) return; try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(t)); u.lang='id-ID'; u.rate=1.0; speechSynthesis.speak(u); }}catch(e){} }
+qs('#themeBtn').onclick = ()=> { document.body.classList.toggle('dark'); qs('#themeBtn').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙'; }
+qs('#repeatBtn').onclick = ()=> speak(window.lastNarr || 'Geomath siap');
+
+qsa('nav button').forEach(b=> b.onclick = ()=>{
+const p=b.getAttribute('data-page');
+qsa('main section').forEach(s=>s.classList.add('hidden'));
+document.getElementById(p).classList.remove('hidden');
+speak('Halaman ' + p);
+});
+document.addEventListener('DOMContentLoaded', ()=> qs('nav button[data-page="home"]').click());
+
+/* ================= Materi data ================= */
+const materiData = {
+datar:[
+{id:'persegi', title:'Persegi', def:'Bangun datar dengan 4 sisi sama panjang dan 4 sudut siku-siku.', props:['Sisi sama panjang','Luas = s²','Keliling = 4 × s'], formula:['L = s²','K = 4s'], example:{q:'Sisi = 8 cm', steps:['L = s² = 8² = 64 cm²','K = 4 × 8 = 32 cm']}},
+{id:'persegiPanjang', title:'Persegi Panjang', def:'Memiliki dua pasang sisi sejajar dan empat sudut siku-siku.', props:['Sisi berpasangan sama panjang','Luas = p × l','Keliling = 2 × (p + l)'], example:{q:'p=10 cm, l=6 cm', steps:['L = 10 × 6 = 60 cm²','K = 2(10+6)=32 cm']}},
+{id:'segitiga', title:'Segitiga', def:'Bangun datar dengan tiga sisi dan tiga sudut (jumlah sudut = 180°).', props:['Jumlah sisi = 3','Luas = 1/2 × alas × tinggi','Keliling = a + b + c'], example:{q:'alas=12, tinggi=8', steps:['L = 1/2 × 12 × 8 = 48 cm²']}},
+{id:'jajargenjang', title:'Jajar Genjang', def:'Sisi berpasangan berhadapan sejajar; luas = alas × tinggi.', props:['Sisi berpasangan sejajar','Sudut berhadapan sama'], example:{q:'alas=12,t=5', steps:['L=12×5=60 cm²']}},
+{id:'belahketupat', title:'Belah Ketupat', def:'4 sisi sama panjang; diagonal saling tegak lurus pada umumnya.', props:['4 sisi sama panjang','Luas = 1/2 × d1 × d2'], example:{q:'d1=10,d2=8', steps:['L = 1/2 × 10 × 8 = 40 cm²']}},
+{id:'trapesium', title:'Trapesium', def:'Memiliki sepasang sisi sejajar (a dan b).', props:['Ada sepasang sisi sejajar'], example:{q:'a=8,b=6,t=5', steps:['L = 1/2 × (8+6) × 5 = 35 cm²']}},
+{id:'lingkaran', title:'Lingkaran', def:'Kumpulan titik yang berjarak sama (r) dari sebuah pusat.', props:['Jari-jari r, diameter d = 2r','Luas = π r²','Keliling = 2 π r'], example:{q:'r=7', steps:['L = π × 7² ≈ 153.94 cm²','K = 2π × 7 ≈ 43.98 cm']}},
+{id:'sektor', title:'Sektor Lingkaran', def:'Bagian lingkaran dibatasi oleh dua jari-jari dan busur.', props:['Sudut sektor θ (derajat/rad)'], example:{q:'r=5,θ=60°', steps:['L = 1/2 × r² × θ(rad) → θ=π/3 rad → L = 1/2 × 25 × π/3 ≈ 13.09']}}
+],
+ruang:[
+{id:'kubus', title:'Kubus', def:'Terdiri dari 6 sisi persegi sama, 12 rusuk.', props:['V = s³','A = 6 s²'], example:{q:'s=5', steps:['V = 125 cm³','A = 6 × 25 = 150 cm²']}},
+{id:'balok', title:'Balok', def:'Terdiri dari 6 persegi panjang; panjang, lebar, tinggi.', props:['V = p × l × t','A = 2(pl + pt + lt)'], example:{q:'p=10,l=4,t=3', steps:['V = 10×4×3 = 120 cm³']}},
+{id:'prisma', title:'Prisma Segitiga', def:'Prisma dengan alas segitiga; sisi tegak sejajar.', props:['V = luas alas × t'], example:{q:'luas alas=20,t=6', steps:['V = 20×6=120 cm³']}},
+{id:'limas', title:'Limas Segitiga', def:'Terdiri dari alas segitiga dan titik puncak.', props:['V = 1/3 × luas alas × t'], example:{q:'luas alas=18,t=6', steps:['V = 1/3 × 18 × 6 = 36 cm³']}},
+{id:'silinder', title:'Silinder (Tabung)', def:'Memiliki dua alas lingkaran sejajar dan selimut.', props:['V = π r² t','A = 2π r (r + t)'], example:{q:'r=6,t=10', steps:['V = π × 36 × 10 ≈ 1130.97 cm³']}},
+{id:'kerucut', title:'Kerucut', def:'Memiliki alas lingkaran dan titik puncak; garis pelukis s.', props:['V = 1/3 π r² t','A = π r (r + s)'], example:{q:'r=3,t=4', steps:['V = 1/3 π × 9 × 4 ≈ 37.70 cm³']}},
+{id:'bola', title:'Bola', def:'Kumpulan titik yang berjarak r dari pusat (3D).', props:['V = 4/3 π r³','A = 4 π r²'], example:{q:'r=3', steps:['V = 4/3 π × 27 ≈ 113.10 cm³']}}
+]
+};
+
+/* Populate select */
+const catSel = qs('#materiCat'), shapeSel = qs('#materiSelect'), visual = qs('#materiVisual'), box = qs('#materiBox');
+function populateMateri(){
+const cat = catSel.value, arr = materiData[cat];
+shapeSel.innerHTML = arr.map(x=>`<option value="${x.id}">${x.title}</option>`).join('');
+}
+catSel.onchange = ()=> { populateMateri(); renderMateri(shapeSel.value); }
+shapeSel.onchange = ()=> renderMateri(shapeSel.value);
+populateMateri(); renderMateri(shapeSel.value);
+
+/* Render materi and show 2D or 3D inline */
+function renderMateri(id){
+const cat = catSel.value;
+const list = materiData[cat];
+const it = list.find(x=>x.id===id);
+if(!it) return;
+let html = `<h3 style="margin-top:0">${it.title}</h3><p>${it.def}</p>`;
+if(it.props){ html += '<h4>Sifat & Rumus</h4><ul>'; it.props.forEach(p=> html+=`<li>${p}</li>`); html += '</ul>'; }
+if(it.formula){ html += '<h4>Rumus</h4><ul>'; it.formula.forEach(f=> html+=`<li>${f}</li>`); html += '</ul>'; }
+if(it.example){ html += `<h4>Contoh soal</h4><div class="example"><b>Soal:</b> ${it.example.q}<br><b>Penyelesaian singkat:</b><ol>` + it.example.steps.map(s=>`<li>${s}</li>`).join('') + '</ol></div>'; }
+box.innerHTML = html;
+// render inline visual: 2D for datar, 3D for ruang
+visual.innerHTML = '';
+if(cat==='datar'){
+// render 2D SVG interactive for each datar shape (use existing simplified sketches)
+render2DInline(id, visual);
+} else {
+// render 3D inline with lightweight WebGL renderer
+render3DInline(id, visual);
+}
+speak(it.title + '. ' + (it.def||''));
+}
+
+/* ================= Simple 2D (SVG) renderer for datar shapes ================= */
+function createSVG(inner){
+const ns='http://www.w3.org/2000/svg';
+const s = document.createElementNS(ns,'svg');
+s.setAttribute('viewBox','0 0 500 500');
+s.innerHTML = inner;
+return s;
+}
+function makeDraggable(svg, onMove){
+let drag = null;
+svg.addEventListener('pointerdown', e=>{ if(e.target.tagName.toLowerCase()==='circle'){ drag = e.target; try{drag.setPointerCapture(e.pointerId);}catch(_){} }});
+svg.addEventListener('pointermove', e=>{ if(!drag) return; const pt = svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; const loc = pt.matrixTransform(svg.getScreenCTM().inverse()); const x = Math.max(10, Math.min(490, loc.x)); const y = Math.max(10, Math.min(490, loc.y)); drag.setAttribute('cx', x); drag.setAttribute('cy', y); if(onMove) onMove(); });
+svg.addEventListener('pointerup', e=>{ if(drag){ try{drag.releasePointerCapture(e.pointerId);}catch(_){} drag=null }});
+}
+
+function render2DInline(shapeId, container){
+container.innerHTML = '';
+if(shapeId==='segitiga'){
+const inner = `<rect width="500" height="500" fill="#fff"/><line id="ab" stroke="#b91c1c" stroke-width="3"/><line id="bc" stroke="#b91c1c" stroke-width="3"/><line id="ca" stroke="#b91c1c" stroke-width="3"/><circle id="A" cx="100" cy="360" r="8" fill="#ef4444" stroke="#fff"/><circle id="B" cx="380" cy="380" r="8" fill="#b91c1c" stroke="#fff"/><circle id="C" cx="220" cy="120" r="8" fill="#f87171" stroke="#fff"/><text id="info" x="12" y="28" font-size="13" fill="#7f1d1d"></text>`;
+const svg = createSVG(inner); container.appendChild(svg);
+const A=svg.getElementById('A'), B=svg.getElementById('B'), C=svg.getElementById('C'), ab=svg.getElementById('ab'), bc=svg.getElementById('bc'), ca=svg.getElementById('ca'), info=svg.getElementById('info');
+function P(el){return {x:+el.getAttribute('cx'), y:+el.getAttribute('cy')} }
+function update(){ const a=P(A), b=P(B), c=P(C); ab.setAttribute('x1',a.x);ab.setAttribute('y1',a.y);ab.setAttribute('x2',b.x);ab.setAttribute('y2',b.y); bc.setAttribute('x1',b.x);bc.setAttribute('y1',b.y);bc.setAttribute('x2',c.x);bc.setAttribute('y2',c.y); ca.setAttribute('x1',c.x);ca.setAttribute('y1',c.y);ca.setAttribute('x2',a.x);ca.setAttribute('y2',a.y); const area=Math.abs((a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y))/2); info.textContent=`Luas ≈ ${area.toFixed(1)}`; }
+update(); makeDraggable(svg, update);
+return;
+}
+if(shapeId==='persegi' || shapeId==='persegiPanjang' || shapeId==='jajargenjang' || shapeId==='trapesium' || shapeId==='belahketupat'){
+const inner = `<rect width="500" height="500" fill="#fff"/><line id="l1" stroke="#6b7280" stroke-width="3"/><line id="l2" stroke="#6b7280" stroke-width="3"/><line id="l3" stroke="#6b7280" stroke-width="3"/><line id="l4" stroke="#6b7280" stroke-width="3"/><circle id="pa" cx="120" cy="120" r="8" fill="#ef4444"/><circle id="pb" cx="380" cy="120" r="8" fill="#b91c1c"/><circle id="pc" cx="380" cy="380" r="8" fill="#f87171"/><circle id="pd" cx="120" cy="380" r="8" fill="#fca5a5"/><text id="info" x="12" y="28" font-size="13" fill="#7f1d1d"></text>`;
+const svg = createSVG(inner); container.appendChild(svg);
+const pa=svg.getElementById('pa'), pb=svg.getElementById('pb'), pc=svg.getElementById('pc'), pd=svg.getElementById('pd');
+const l1=svg.getElementById('l1'), l2=svg.getElementById('l2'), l3=svg.getElementById('l3'), l4=svg.getElementById('l4'), info=svg.getElementById('info');
+function P(el){return {x:+el.getAttribute('cx'), y:+el.getAttribute('cy')} }
+function update(){ const A=P(pa),B=P(pb),C=P(pc),D=P(pd); l1.setAttribute('x1',A.x);l1.setAttribute('y1',A.y);l1.setAttribute('x2',B.x);l1.setAttribute('y2',B.y); l2.setAttribute('x1',B.x);l2.setAttribute('y1',B.y);l2.setAttribute('x2',C.x);l2.setAttribute('y2',C.y); l3.setAttribute('x1',C.x);l3.setAttribute('y1',C.y);l3.setAttribute('x2',D.x);l3.setAttribute('y2',D.y); l4.setAttribute('x1',D.x);l4.setAttribute('y1',D.y);l4.setAttribute('x2',A.x);l4.setAttribute('y2',A.y); const s1=Math.hypot(A.x-B.x,A.y-B.y); const s2=Math.hypot(B.x-C.x,B.y-C.y); const area=s1*s2; info.textContent=`s1=${s1.toFixed(1)} s2=${s2.toFixed(1)} • Luas≈${area.toFixed(1)}`;}
+update(); makeDraggable(svg, update);
+return;
+}
+if(shapeId==='lingkaran' || shapeId==='sektor'){
+const inner = `<rect width="500" height="500" fill="#fff"/><circle id="center" cx="250" cy="250" r="4" fill="#b91c1c"/><circle id="rpt" cx="360" cy="250" r="8" fill="#ef4444"/><line id="rad" stroke="#b91c1c" stroke-width="2"/><text id="info" x="12" y="28" font-size="13" fill="#7f1d1d"></text>`;
+const svg = createSVG(inner); container.appendChild(svg);
+const center=svg.getElementById('center'), rpt=svg.getElementById('rpt'), rad=svg.getElementById('rad'), info=svg.getElementById('info');
+function update(){ const cx=+center.getAttribute('cx'), cy=+center.getAttribute('cy'); const rx=+rpt.getAttribute('cx'), ry=+rpt.getAttribute('cy'); const r=Math.hypot(rx-cx,ry-cy); rad.setAttribute('x1',cx);rad.setAttribute('y1',cy);rad.setAttribute('x2',rx);rad.setAttribute('y2',ry); info.textContent=`r=${r.toFixed(2)} • Luas≈${(Math.PI*r*r).toFixed(2)}`;}
+update(); makeDraggable(svg, update);
+return;
+}
+container.innerHTML = '<div class="small">Ilustrasi 2D tidak tersedia.</div>';
+}
+
+/* ================= Lightweight WebGL 3D renderer (offline) =================
+- Purpose: simple colored shapes, orbit (rotate + zoom) interaction
+- Provides: box, cylinder, cone, sphere (approx), triangular prism, extruded shapes
+- Implementation: raw WebGL minimal shader + matrix math
+- NOTE: This is intentionally small and minimal (wireframe/solid).
+========================================================================== */
+
+/* Minimal linear algebra helpers */
+function mat4Identity(){ return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]; }
+function mat4Multiply(a,b){
+const out=new Array(16);
+for(let i=0;i<4;i++){
+for(let j=0;j<4;j++){
+out[i*4+j]=0;
+for(let k=0;k<4;k++) out[i*4+j]+=a[i*4+k]*b[k*4+j];
+}
+}
+return out;
+}
+function mat4Perspective(fovy, aspect, near, far){
+const f = 1/Math.tan(fovy/2), nf = 1/(near - far);
+const out = new Array(16).fill(0);
+out[0] = f / aspect;
+out[5] = f;
+out[10] = (far + near) * nf;
+out[11] = -1;
+out[14] = (2 * far * near) * nf;
+return out;
+}
+function mat4Translate(m, x,y,z){
+const out = m.slice(); out[12]+=x; out[13]+=y; out[14]+=z; return out;
+}
+function mat4RotateX(m, a){
+const c=Math.cos(a), s=Math.sin(a); const r=[1,0,0,0, 0,c,-s,0, 0,s,c,0, 0,0,0,1];
+return mat4Multiply(m,r);
+}
+function mat4RotateY(m, a){
+const c=Math.cos(a), s=Math.sin(a); const r=[c,0,s,0, 0,1,0,0, -s,0,c,0, 0,0,0,1];
+return mat4Multiply(m,r);
+}
+function mat4Scale(m, x,y,z){
+const out=m.slice(); out[0]*=x; out[5]*=y; out[10]*=z; return out;
+}
+
+/* WebGL helpers: create program, buffer */
+function createShader(gl, type, src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); gl.deleteShader(s); return null } return s; }
+function createProgram(gl, vs, fs){ const sv=createShader(gl,gl.VERTEX_SHADER,vs); const sf=createShader(gl,gl.FRAGMENT_SHADER,fs); const p=gl.createProgram(); gl.attachShader(p,sv); gl.attachShader(p,sf); gl.linkProgram(p); if(!gl.getProgramParameter(p, gl.LINK_STATUS)){ console.error(gl.getProgramInfoLog(p)); return null } return p; }
+
+/* Generate primitive geometry */
+function genBox(w,h,d){
+const hw=w/2, hh=h/2, hd=d/2;
+const positions = [
+-hw,-hh,-hd, hw,-hh,-hd, hw,hh,-hd, -hw,hh,-hd, // back
+-hw,-hh,hd, hw,-hh,hd, hw,hh,hd, -hw,hh,hd
+];
+const indices = [
+0,1,2, 0,2,3, 4,6,5, 4,7,6, // front/back
+0,4,5, 0,5,1, 1,5,6, 1,6,2, 2,6,7, 2,7,3, 3,7,4, 3,4,0
+];
+return {positions:new Float32Array(positions), indices:new Uint16Array(indices)};
+}
+function genSphere(r, lat=12, lon=12){
+const pos=[]; const ind=[];
+for(let y=0;y<=lat;y++){
+const v = y/lat;
+const theta = v*Math.PI;
+for(let x=0;x<=lon;x++){
+const u = x/lon;
+const phi = u*2*Math.PI;
+const px = r*Math.sin(theta)*Math.cos(phi);
+const py = r*Math.cos(theta);
+const pz = r*Math.sin(theta)*Math.sin(phi);
+pos.push(px,py,pz);
+}
+}
+for(let y=0;y<lat;y++){
+for(let x=0;x<lon;x++){
+const i = y*(lon+1)+x;
+ind.push(i,i+1,i+lon+1, i+1,i+lon+2,i+lon+1);
+}
+}
+return {positions:new Float32Array(pos), indices:new Uint16Array(ind)};
+}
+function genCylinder(r,h,radSeg=24){
+const pos=[]; const ind=[];
+for(let y=0;y<=1;y++){
+const vy = -h/2 + y*h;
+for(let i=0;i<=radSeg;i++){
+const a = i/radSeg*2*Math.PI;
+pos.push(r*Math.cos(a), vy, r*Math.sin(a));
+}
+}
+// sides
+for(let i=0;i<radSeg;i++){
+const a = i;
+ind.push(a,a+radSeg+1,a+1);
+ind.push(a+1,a+radSeg+1,a+radSeg+2);
+}
+return {positions:new Float32Array(pos), indices:new Uint16Array(ind)};
+}
+function genCone(r,h,radSeg=24){
+const pos=[]; const ind=[];
+// base circle and apex
+pos.push(0,h/2,0); // apex index 0
+for(let i=0;i<=radSeg;i++){ const a=i/radSeg*2*Math.PI; pos.push(r*Math.cos(a), -h/2, r*Math.sin(a)); }
+for(let i=1;i<=radSeg;i++){
+ind.push(0, i, i+1);
+}
+return {positions:new Float32Array(pos), indices:new Uint16Array(ind)};
+}
+/* Triangular prism */
+function genTriPrism(base=1,height=0.6,length=1.2){
+const pos=[
+0,base/2, -length/2, -base/2,-base/2,-length/2, base/2,-base/2,-length/2,
+0,base/2, length/2, -base/2,-base/2,length/2, base/2,-base/2,length/2
+];
+const ind=[0,1,2, 3,5,4, 0,3,4,0,4,1, 1,4,5,1,5,2, 2,5,3,2,3,0];
+return {positions:new Float32Array(pos), indices:new Uint16Array(ind)};
+}
+
+/* Render engine for a given container */
+function createGL(container, shapeId){
+container.innerHTML = '';
+const cnv = document.createElement('canvas'); cnv.className='three-canvas'; cnv.width = container.clientWidth || 800; cnv.height = container.clientHeight || 360;
+container.appendChild(cnv);
+const gl = cnv.getContext('webgl',{antialias:true});
+if(!gl){ container.innerHTML = '<div class="small">WebGL tidak tersedia di browser ini.</div>'; return null; }
+
+// simple shader
+const vs = `
+attribute vec3 aPos;
+uniform mat4 uMVP;
+void main(){ gl_Position = uMVP * vec4(aPos,1.0); }
+`;
+const fs = `
+precision mediump float;
+uniform vec3 uColor;
+void main(){ gl_FragColor = vec4(uColor,1.0); }
+`;
+const prog = createProgram(gl, vs, fs);
+gl.useProgram(prog);
+const posLoc = gl.getAttribLocation(prog, 'aPos');
+const uMVP = gl.getUniformLocation(prog, 'uMVP');
+const uColor = gl.getUniformLocation(prog, 'uColor');
+
+// choose geometry
+let geom;
+switch(shapeId){
+case 'kubus': geom = genBox(1.4,1.4,1.4); break;
+case 'balok': geom = genBox(2.0,1.2,1.4); break;
+case 'prisma': geom = genTriPrism(1.0,1.0,1.2); break;
+case 'limas': geom = genCone(1.0,1.6,4); break; // approx pyramid
+case 'silinder': geom = genCylinder(1.0,1.8,36); break;
+case 'kerucut': geom = genCone(1.0,1.8,36); break;
+case 'bola': geom = genSphere(1.0,16,24); break;
+default: geom = genBox(1.2,0.08,1.2);
+}
+
+const vbo = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vbo); gl.bufferData(gl.ARRAY_BUFFER, geom.positions, gl.STATIC_DRAW);
+const ibo = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, geom.indices, gl.STATIC_DRAW);
+
+gl.enableVertexAttribArray(posLoc); gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
+
+// simple camera params (orbit)
+let rotX = -0.4, rotY = 0.6, dist = 4.0;
+let dragging=false, lastX=0, lastY=0;
+cnv.addEventListener('pointerdown', e=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; cnv.setPointerCapture(e.pointerId); });
+window.addEventListener('pointerup', e=>{ dragging=false; try{ cnv.releasePointerCapture(e.pointerId);}catch(_){} });
+cnv.addEventListener('pointermove', e=>{ if(!dragging) return; const dx=(e.clientX-lastX)/200; const dy=(e.clientY-lastY)/200; lastX=e.clientX; lastY=e.clientY; rotY += dx; rotX += dy; });
+cnv.addEventListener('wheel', e=>{ e.preventDefault(); dist += e.deltaY*0.01; dist = Math.max(1.2, Math.min(12, dist)); }, {passive:false});
+
+function render(){
+gl.viewport(0,0,cnv.width,cnv.height);
+gl.clearColor(1,1,1,1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+gl.enable(gl.DEPTH_TEST);
+
+// model matrix (rotation)
+let model = mat4Identity();
+model = mat4RotateX(model, rotX);
+model = mat4RotateY(model, rotY);
+
+// view
+const aspect = cnv.width / cnv.height;
+const proj = mat4Perspective(45*Math.PI/180, aspect, 0.1, 100);
+const cam = mat4Translate(mat4Identity(), 0, 0, -dist);
+
+const mvp = mat4Multiply(mat4Multiply(proj, cam), model);
+gl.uniformMatrix4fv(uMVP, false, new Float32Array(mvp));
+// flat color
+gl.uniform3f(uColor, 185/255, 28/255, 28/255);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.vertexAttribPointer(posLoc,3,gl.FLOAT,false,0,0);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+gl.drawElements(gl.TRIANGLES, geom.indices.length, gl.UNSIGNED_SHORT, 0);
+requestAnimationFrame(render);
+}
+
+// resize handling
+function onResize(){ cnv.width = container.clientWidth || 800; cnv.height = container.clientHeight || 360; }
+window.addEventListener('resize', onResize);
+onResize();
+render();
+return {dispose:()=>{ window.removeEventListener('resize', onResize); } };
+}
+
+/* Wrapper render3DInline */
+const glInstances = {};
+function render3DInline(id, container){
+container.innerHTML = '';
+const holder = document.createElement('div'); holder.style.width='100%'; holder.style.height='360px'; holder.style.background='#fff'; holder.style.borderRadius='8px'; container.appendChild(holder);
+// create GL scene for shape id (use ruang mapping)
+let shape = id;
+// map aliases: if data is datar mistaken, default to cube
+if(!['kubus','balok','prisma','limas','silinder','kerucut','bola'].includes(shape)) shape='kubus';
+// create instance
+if(glInstances[holder]) { glInstances[holder].dispose(); delete glInstances[holder]; }
+glInstances[holder] = createGL(holder, shape);
+}
+
+/* ================= Calc logic + autosave (silent) ================= */
+const CALC_KEY = 'geomath_calc_offline_v1';
+const calcShape = qs('#calcShape'), calcInputs = qs('#calcInputs');
+function buildCalcInputs(shape){
+calcInputs.innerHTML='';
+function add(html){ calcInputs.insertAdjacentHTML('beforeend', html); }
+if(shape==='persegi') add(`<label>Sisi (s)</label><input id="inp_s" type="number" step="any">`);
+if(shape==='persegiPanjang') add(`<label>Panjang (p)</label><input id="inp_p" type="number" step="any"><label>Lebar (l)</label><input id="inp_l" type="number" step="any">`);
+if(shape==='segitiga') add(`<label>Alas</label><input id="inp_alas" type="number" step="any"><label>Tinggi</label><input id="inp_tinggi" type="number" step="any"><label>Sisi a</label><input id="inp_a" type="number" step="any"><label>Sisi b</label><input id="inp_b" type="number" step="any"><label>Sisi c</label><input id="inp_c" type="number" step="any">`);
+if(shape==='jajargenjang') add(`<label>Alas (a)</label><input id="inp_a2" type="number" step="any"><label>Tinggi (t)</label><input id="inp_t2" type="number" step="any">`);
+if(shape==='belahketupat') add(`<label>Diagonal 1 (d1)</label><input id="inp_d1" type="number" step="any"><label>Diagonal 2 (d2)</label><input id="inp_d2" type="number" step="any">`);
+if(shape==='trapesium') add(`<label>Alas a</label><input id="inp_a3" type="number" step="any"><label>Alas b</label><input id="inp_b3" type="number" step="any"><label>Tinggi (t)</label><input id="inp_t3" type="number" step="any">`);
+if(shape==='lingkaran') add(`<label>Jari-jari (r)</label><input id="inp_r" type="number" step="any"><label>Diameter (d)</label><input id="inp_d" type="number" step="any">`);
+if(shape==='sektor') add(`<label>Jari-jari (r)</label><input id="inp_r2" type="number" step="any"><label>Sudut (derajat)</label><input id="inp_theta" type="number" step="any">`);
+if(shape==='kubus') add(`<label>Sisi (s)</label><input id="inp_s" type="number" step="any">`);
+if(shape==='balok') add(`<label>Panjang (p)</label><input id="inp_p" type="number" step="any"><label>Lebar (l)</label><input id="inp_l" type="number" step="any"><label>Tinggi (t)</label><input id="inp_t" type="number" step="any">`);
+if(shape==='silinder') add(`<label>Jari-jari (r)</label><input id="inp_r" type="number" step="any"><label>Tinggi (t)</label><input id="inp_t" type="number" step="any">`);
+if(shape==='kerucut') add(`<label>Jari-jari (r)</label><input id="inp_r" type="number" step="any"><label>Tinggi (t)</label><input id="inp_t" type="number" step="any">`);
+if(shape==='bola') add(`<label>Jari-jari (r)</label><input id="inp_r" type="number" step="any">`);
+// attach autosave
+Array.from(calcInputs.querySelectorAll('input')).forEach(i=> i.addEventListener('input', autosaveCalc));
+loadCalc();
+// preview visual
+renderCalcPreview(shape);
+}
+calcShape.onchange = ()=> buildCalcInputs(calcShape.value);
+buildCalcInputs(calcShape.value);
+
+function autosaveCalc(){
+try{
+const shape = calcShape.value;
+const data = JSON.parse(localStorage.getItem(CALC_KEY) || '{}');
+data[shape] = {};
+Array.from(calcInputs.querySelectorAll('input')).forEach(i=> data[shape][i.id]=i.value);
+localStorage.setItem(CALC_KEY, JSON.stringify(data));
+}catch(e){ console.error(e); }
+}
+function loadCalc(){
+try{
+const shape = calcShape.value;
+const data = JSON.parse(localStorage.getItem(CALC_KEY) || '{}');
+const obj = data[shape] || {};
+Array.from(calcInputs.querySelectorAll('input')).forEach(i=> { if(obj[i.id]!==undefined) i.value = obj[i.id]; });
+}catch(e){ console.error(e); }
+}
+qs('#resetShapes').onclick = ()=> { if(confirm('Reset input saat ini?')){ localStorage.removeItem(CALC_KEY); buildCalcInputs(calcShape.value); } }
+
+/* render simple preview for calc (2D or 3D) */
+function renderCalcPreview(shape){
+const container = qs('#calcVisual');
+container.innerHTML = '';
+// if datar -> show 2D svg; if ruang -> show 3D canvas
+const datars = ['persegi','persegiPanjang','segitiga','jajargenjang','belahketupat','trapesium','lingkaran','sektor'];
+if(datars.includes(shape)){
+// reuse render2DInline but into calcVisual
+render2DInline(shape, container);
+} else {
+render3DInline(shape, container);
+}
+}
+
+/* calc compute */
+qs('#calcBtn').onclick = ()=>{
+const shape = calcShape.value; const π = Math.PI;
+let area=null, perim=null, vol=null, steps='', note='';
+try{
+if(shape==='persegi'){ const s=parseFloat(qs('#inp_s')?.value); if(!isNaN(s)){ area=s*s; perim=4*s; steps=`L = s² = ${s}² = ${area}\nK = 4 × s = ${perim}` } else note='Isi sisi'; }
+else if(shape==='persegiPanjang'){ const p=parseFloat(qs('#inp_p')?.value), l=parseFloat(qs('#inp_l')?.value); if(!isNaN(p)&&!isNaN(l)){ area=p*l; perim=2*(p+l); steps=`L = p × l = ${area}\nK = 2(p+l) = ${perim}` } else note='Isi p & l'; }
+else if(shape==='segitiga'){ const a=parseFloat(qs('#inp_a')?.value), b=parseFloat(qs('#inp_b')?.value), c=parseFloat(qs('#inp_c')?.value); const alas=parseFloat(qs('#inp_alas')?.value), t=parseFloat(qs('#inp_tinggi')?.value); if(!isNaN(a)&&!isNaN(b)&&!isNaN(c)){ const s=(a+b+c)/2; const inside = s*(s-a)*(s-b)*(s-c); if(inside>=0){ area=Math.sqrt(inside); perim=a+b+c; steps=`Heron: s=${s.toFixed(3)} → L=√(...)=${area.toFixed(4)}` } else note='Sisi tidak membentuk segitiga'; } else if(!isNaN(alas)&&!isNaN(t)){ area=0.5*alas*t; steps=`L = 1/2 × ${alas} × ${t} = ${area}` } else note='Isi sisi atau alas & tinggi'; }
+else if(shape==='jajargenjang'){ const a=parseFloat(qs('#inp_a2')?.value), t=parseFloat(qs('#inp_t2')?.value); if(!isNaN(a)&&!isNaN(t)){ area=a*t; steps=`L = a × t = ${area}` } else note='Isi alas & tinggi'; }
+else if(shape==='belahketupat'){ const d1=parseFloat(qs('#inp_d1')?.value), d2=parseFloat(qs('#inp_d2')?.value); if(!isNaN(d1)&&!isNaN(d2)){ area=0.5*d1*d2; steps=`L = 1/2 × d1 × d2 = ${area}` } else note='Isi diagonal'; }
+else if(shape==='trapesium'){ const a=parseFloat(qs('#inp_a3')?.value), b=parseFloat(qs('#inp_b3')?.value), t=parseFloat(qs('#inp_t3')?.value); if(!isNaN(a)&&!isNaN(b)&&!isNaN(t)){ area=0.5*(a+b)*t; steps=`L = 1/2 (a+b) t = ${area}` } else note='Isi a,b,t'; }
+else if(shape==='lingkaran'){ let r=parseFloat(qs('#inp_r')?.value), d=parseFloat(qs('#inp_d')?.value); if(isNaN(r)&&!isNaN(d)) r=d/2; if(!isNaN(r)){ area=π*r*r; perim=2*π*r; steps=`L = π r² = ${area.toFixed(4)}\nK = 2πr = ${perim.toFixed(4)}` } else note='Isi r atau d'; }
+else if(shape==='sektor'){ const r=parseFloat(qs('#inp_r2')?.value), deg=parseFloat(qs('#inp_theta')?.value); if(!isNaN(r)&&!isNaN(deg)){ const rad=deg*Math.PI/180; area=0.5*r*r*rad; perim=r*rad+2*r; steps=`θ=${deg}°=${rad.toFixed(4)} rad\nL = 1/2 r² θ = ${area.toFixed(4)}` } else note='Isi r & sudut'; }
+else if(shape==='kubus'){ const s=parseFloat(qs('#inp_s')?.value); if(!isNaN(s)){ vol=Math.pow(s,3); area=6*s*s; steps=`V = s³ = ${vol}\nA = 6 s² = ${area}` } else note='Isi s'; }
+else if(shape==='balok'){ const p=parseFloat(qs('#inp_p')?.value), l=parseFloat(qs('#inp_l')?.value), t=parseFloat(qs('#inp_t')?.value); if(!isNaN(p)&&!isNaN(l)&&!isNaN(t)){ vol=p*l*t; area=2*(p*l + p*t + l*t); steps=`V = p×l×t = ${vol}\nA = 2(pl+pt+lt) = ${area}` } else note='Isi p,l,t'; }
+else if(shape==='silinder'){ const r=parseFloat(qs('#inp_r')?.value), t=parseFloat(qs('#inp_t')?.value); if(!isNaN(r)&&!isNaN(t)){ vol=Math.PI*r*r*t; area=2*Math.PI*r*(r+t); steps=`V = π r² t = ${vol.toFixed(4)}\nA = 2πr(r+t) = ${area.toFixed(4)}` } else note='Isi r,t'; }
+else if(shape==='kerucut'){ const r=parseFloat(qs('#inp_r')?.value), t=parseFloat(qs('#inp_t')?.value); if(!isNaN(r)&&!isNaN(t)){ const s = Math.sqrt(r*r + t*t); vol=(1/3)*Math.PI*r*r*t; area=Math.PI*r*(r+s); steps=`V=1/3πr²t=${vol.toFixed(4)}\nA=πr(r+s) where s=${s.toFixed(3)} => ${area.toFixed(4)}` } else note='Isi r,t'; }
+else if(shape==='bola'){ const r=parseFloat(qs('#inp_r')?.value); if(!isNaN(r)){ vol=(4/3)*Math.PI*r*r*r; area=4*Math.PI*r*r; steps=`V=4/3πr³=${vol.toFixed(4)}\nA=4πr²=${area.toFixed(4)}` } else note='Isi r'; }
+}catch(e){ note = 'Error perhitungan'; console.error(e); }
+qs('#calcArea').innerText = area!==null ? ('Luas: ' + Number((area).toFixed(6)) + ' (satuan²)') : 'Luas: —';
+qs('#calcPerim').innerText = perim!==null ? ('Keliling: ' + (typeof perim==='number' ? Number(perim.toFixed(6)) : perim)) : 'Keliling: —';
+qs('#calcVol').innerText = vol!==null ? ('Volume: ' + Number((vol).toFixed(6)) + ' (satuan³)') : 'Volume: —';
+if(steps){ qs('#calcSteps').classList.remove('hidden'); qs('#calcSteps').innerText = steps; } else { qs('#calcSteps').classList.add('hidden'); qs('#calcSteps').innerText = ''; }
+if(note) qs('#calcNote').innerText = note; else qs('#calcNote').innerText = '';
+autosaveCalc(); renderCalcPreview(calcShape.value); speak('Perhitungan selesai.');
+};
+
+/* ================= Kuis engine (50 mixed questions) ================= */
+const QTOTAL = 50;
+const QUIZ_KEY = 'geomath_quiz_offline_v1';
+let questions = [], curQ=0, userAnswers = [], graded=false, gradeResult=null;
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function genQ(){
+const types = ['segitiga_area','segitiga_perim','persegi_area','persegi_perim','pp_area','pp_perim','lingkar_area','lingkar_perim','bola_vol','silinder_vol','kubus_vol','trapesium_area','jajargenjang_area','belahketupat_area','sektor_area','kerucut_vol'];
+const t = types[randInt(0,types.length-1)];
+if(t==='segitiga_area'){ const a=randInt(3,30), h=randInt(2,25); return {q:`Hitung luas segitiga alas ${a} tinggi ${h}.`, ans:+(0.5*a*h).toFixed(3)}; }
+if(t==='segitiga_perim'){ let a=randInt(2,20), b=randInt(2,20), c=randInt(2,20); while(!(a+b>c && b+c>a && c+a>b)){ a=randInt(2,20); b=randInt(2,20); c=randInt(2,20);} return {q:`Segitiga sisi a=${a}, b=${b}, c=${c}. Keliling?`, ans:a+b+c}; }
+if(t==='persegi_area'){ const s=randInt(2,35); return {q:`Persegi sisi ${s}. Luas?`, ans:s*s}; }
+if(t==='persegi_perim'){ const s=randInt(2,35); return {q:`Persegi sisi ${s}. Keliling?`, ans:4*s}; }
+if(t==='pp_area'){ const p=randInt(3,35), l=randInt(2,30); return {q:`Persegi panjang p=${p}, l=${l}. Luas?`, ans:p*l}; }
+if(t==='pp_perim'){ const p=randInt(3,35), l=randInt(2,30); return {q:`Persegi panjang p=${p}, l=${l}. Keliling?`, ans:2*(p+l)}; }
+if(t==='lingkar_area'){ const r=randInt(2,18); return {q:`Lingkaran r=${r}. (π=3.14159) Luas (2 des):`, ans:+(Math.PI*r*r).toFixed(2)}; }
+if(t==='lingkar_perim'){ const r=randInt(2,18); return {q:`Lingkaran r=${r}. (π=3.14159) Keliling (2 des):`, ans:+(2*Math.PI*r).toFixed(2)}; }
+if(t==='bola_vol'){ const r=randInt(2,14); return {q:`Bola jari-jari ${r}. Volume (π=3.14159) (2 des):`, ans:+((4/3)*Math.PI*r*r*r).toFixed(2)}; }
+if(t==='silinder_vol'){ const r=randInt(2,12), t=randInt(3,25); return {q:`Silinder r=${r}, t=${t}. Volume (π=3.14159) (2 des):`, ans:+(Math.PI*r*r*t).toFixed(2)}; }
+if(t==='kubus_vol'){ const s=randInt(2,15); return {q:`Kubus sisi ${s}. Volume:`, ans:s*s*s}; }
+if(t==='trapesium_area'){ const a=randInt(3,25), b=randInt(2,25), t=randInt(2,20); return {q:`Trapesium alas a=${a}, b=${b}, tinggi ${t}. Luas?`, ans:+(0.5*(a+b)*t).toFixed(3)}; }
+if(t==='jajargenjang_area'){ const a=randInt(3,30), t=randInt(2,25); return {q:`Jajar genjang alas ${a}, tinggi ${t}. Luas?`, ans:a*t}; }
+if(t==='belahketupat_area'){ const d1=randInt(4,30), d2=randInt(3,28); return {q:`Belah ketupat diagonal d1=${d1}, d2=${d2}. Luas?`, ans:+(0.5*d1*d2).toFixed(3)}; }
+if(t==='sektor_area'){ const r=randInt(3,18), deg=randInt(30,300); const rad=deg*Math.PI/180; return {q:`Sektor lingkaran r=${r}, sudut ${deg}°. Luas (3 des):`, ans:+(0.5*r*r*rad).toFixed(3)}; }
+if(t==='kerucut_vol'){ const r=randInt(2,12), t=randInt(3,20); return {q:`Kerucut r=${r}, t=${t}. Volume (π=3.14159) (3 des):`, ans:+(((1/3)*Math.PI*r*r*t)).toFixed(3)}; }
+return {q:'Soal error', ans:0};
+}
+function genQuiz(){
+questions = Array.from({length:QTOTAL}, ()=> genQ());
+curQ = 0; userAnswers = Array(QTOTAL).fill('');
+graded=false; gradeResult=null;
+saveQuiz();
+refreshQuiz();
+}
+function saveQuiz(){
+try{ localStorage.setItem(QUIZ_KEY, JSON.stringify({questions,curQ,userAnswers,graded,gradeResult})); }catch(e){console.error(e);}
+}
+function loadQuiz(){
+try{
+const raw = localStorage.getItem(QUIZ_KEY);
+if(!raw) return false;
+const obj = JSON.parse(raw);
+if(!obj || !obj.questions) return false;
+questions = obj.questions; curQ = obj.curQ || 0; userAnswers = obj.userAnswers || Array(QTOTAL).fill(''); graded=!!obj.graded; gradeResult = obj.gradeResult || null;
+refreshQuiz(); return true;
+}catch(e){ console.error(e); return false; }
+}
+function refreshQuiz(){
+qs('#qTot').innerText = QTOTAL;
+qs('#qIdx').innerText = Math.min(curQ+1, QTOTAL);
+if(curQ < QTOTAL) qs('#questionArea').innerText = questions[curQ].q;
+else qs('#questionArea').innerText = 'Semua soal selesai — klik Periksa Jawaban untuk nilai.';
+qs('#qAnswer').value = userAnswers[curQ] || '';
+}
+if(!loadQuiz()) genQuiz();
+
+qs('#qAnswer').addEventListener('input', ()=> { userAnswers[curQ] = qs('#qAnswer').value; saveQuiz(); });
+
+qs('#nextQ').onclick = ()=> { userAnswers[curQ] = qs('#qAnswer').value; if(curQ < QTOTAL-1) curQ++; saveQuiz(); refreshQuiz(); }
+qs('#prevQ').onclick = ()=> { userAnswers[curQ] = qs('#qAnswer').value; if(curQ>0) curQ--; saveQuiz(); refreshQuiz(); }
+qs('#startQuiz').onclick = ()=> { if(confirm('Mulai ulang kuis? Semua progres kuis akan direset.')){ genQuiz(); alert('Kuis dimulai ulang.'); } }
+
+qs('#periksa').onclick = ()=> {
+graded=true;
+let correctCount=0;
+const perFeed=[];
+for(let i=0;i<questions.length;i++){
+const correct = Number(questions[i].ans);
+const raw = (userAnswers[i]||'').toString().trim();
+const userNum = Number(raw.replace(',','.'));
+let ok=false;
+if(!isNaN(userNum) && !isNaN(correct)){
+const tol = Math.max(0.05, Math.abs(correct)*0.02);
+if(Math.abs(userNum - Number(correct)) <= tol) ok=true;
+} else { if(String(raw).toLowerCase()===String(correct).toLowerCase()) ok=true; }
+if(ok) correctCount++;
+perFeed.push({index:i, q:questions[i].q, user:raw, key:questions[i].ans, ok});
+}
+gradeResult = {correctCount, total:questions.length, perFeed, date:Date.now()};
+saveQuiz();
+renderResults();
+};
+
+function renderResults(){
+if(!gradeResult) return;
+qs('#quizResults').classList.remove('hidden');
+qs('#scoreSummary').innerHTML = `<b>Skor:</b> ${gradeResult.correctCount} / ${gradeResult.total} (${((gradeResult.correctCount/gradeResult.total)*100).toFixed(1)}%)`;
+const feedEl = qs('#perQuestionFeedback'); feedEl.innerHTML = '';
+gradeResult.perFeed.forEach(p=>{
+const d = document.createElement('div'); d.className='card'; d.style.marginBottom='8px';
+d.innerHTML = `<strong>#${p.index+1}</strong> ${p.q}<br><small>Jawaban Anda: <b>${p.user||'(kosong)'}</b> • Kunci: <b>${p.key}</b> → ${p.ok?'<span style="color:green;font-weight:700">Benar</span>':'<span style="color:#b91c1c;font-weight:700">Salah</span>'}</small>`;
+feedEl.appendChild(d);
+});
+}
+
+qs('#resetQuizProgress').onclick = ()=> {
+if(confirm('Hapus progres kuis?')){ localStorage.removeItem(QUIZ_KEY); genQuiz(); qs('#quizResults').classList.add('hidden'); alert('Progres kuis dihapus.'); }
+}
+
+/* ================= Latihan (autosave) ================= */
+const LAT_KEY = 'geomath_latihan_offline_v1';
+const latihanSelect = qs('#latihanSelect'), latihanBox = qs('#latihanBox');
+latihanSelect.onchange = ()=> renderLatihan(latihanSelect.value);
+function renderLatihan(id){
+const savedAll = JSON.parse(localStorage.getItem(LAT_KEY) || '{}');
+const saved = savedAll[id] || {};
+if(id==='t1'){
+latihanBox.innerHTML = `<div><b>Soal:</b> Segitiga alas 14 cm, tinggi 9 cm. Tulis 3 langkah.</div><ol style="margin-top:8px"><li><input id="l1" placeholder="Langkah 1"></li><li><input id="l2" placeholder="Langkah 2"></li><li><input id="l3" placeholder="Langkah 3 (jawaban)"></li></ol><div style="margin-top:8px"><button id="check1" class="btn primary">Cek</button> <span id="latFeedback" class="small"></span></div>`;
+} else if(id==='t2'){
+latihanBox.innerHTML = `<div><b>Soal:</b> Persegi panjang p=15 cm, l=7 cm. Tulis 2 langkah.</div><ol style="margin-top:8px"><li><input id="l1" placeholder="Langkah 1"></li><li><input id="l2" placeholder="Langkah 2"></li></ol><div style="margin-top:8px"><button id="check2" class="btn primary">Cek</button> <span id="latFeedback" class="small"></span></div>`;
+} else if(id==='t3'){
+latihanBox.innerHTML = `<div><b>Soal:</b> Silinder r=6 cm, t=10 cm. Tulis 2 langkah (volume).</div><ol style="margin-top:8px"><li><input id="l1" placeholder="Langkah 1"></li><li><input id="l2" placeholder="Langkah 2"></li></ol><div style="margin-top:8px"><button id="check3" class="btn primary">Cek</button> <span id="latFeedback" class="small"></span></div>`;
+}
+setTimeout(()=> {
+Array.from(latihanBox.querySelectorAll('input')).forEach(inp=>{
+if(saved[inp.id]) inp.value = saved[inp.id];
+inp.addEventListener('input', ()=> {
+const all = JSON.parse(localStorage.getItem(LAT_KEY) || '{}');
+all[id] = all[id] || {};
+all[id][inp.id] = inp.value;
+localStorage.setItem(LAT_KEY, JSON.stringify(all));
+});
+});
+if(qs('#check1')) qs('#check1').onclick = ()=> {
+const s1=qs('#l1').value.toLowerCase(), s2=qs('#l2').value.toLowerCase(), s3=qs('#l3').value.toLowerCase();
+let ok=true,msg='';
+if(!(s1.includes('luas')||s1.includes('1/2')||s1.includes('alas'))) ok=false,msg+='Langkah1 kurang. ';
+if(!(s2.includes('14')&&s2.includes('9'))) ok=false,msg+='Langkah2 kurang. ';
+if(!(s3.includes('63')||s3.includes('63.'))) ok=false,msg+='Jawaban harus 63. ';
+qs('#latFeedback').innerHTML = ok?'<span style="color:green;font-weight:700">Langkah benar. 63 cm²</span>':'<span style="color:#b91c1c">'+msg+'</span>';
+};
+if(qs('#check2')) qs('#check2').onclick = ()=> {
+const s1=qs('#l1').value.toLowerCase(), s2=qs('#l2').value.toLowerCase();
+let ok=true,msg='';
+if(!(s1.includes('luas')||s1.includes('p')||s1.includes('l'))) ok=false,msg+='Langkah1 kurang. ';
+if(!(s2.includes('105')||s2.includes('105.'))) ok=false,msg+='Jawaban harus 105. ';
+qs('#latFeedback').innerHTML = ok?'<span style="color:green;font-weight:700">Langkah benar. Luas = 105 cm²</span>':'<span style="color:#b91c1c">'+msg+'</span>';
+};
+if(qs('#check3')) qs('#check3').onclick = ()=> {
+const s1=qs('#l1').value.toLowerCase(), s2=qs('#l2').value.toLowerCase();
+let ok=true,msg='';
+if(!(s1.includes('π')||s1.includes('pi')||s1.includes('r^2')||s1.includes('r*r'))) ok=false,msg+='Langkah1 kurang. ';
+if(!(s2.includes('1130')||s2.includes('1130.97'))) ok=false,msg+='Jawaban harus ≈1130.97. ';
+qs('#latFeedback').innerHTML = ok?'<span style="color:green;font-weight:700">Langkah benar. Volume ≈ 1130.97 cm³</span>':'<span style="color:#b91c1c">'+msg+'</span>';
+};
+},20);
+}
+renderLatihan(latihanSelect.value);
+
+/* ================= Initialization ================= */
+render2DInline('persegi', qs('#preview'));
+render3DInline('kubus', qs('#preview'));
+renderCalcPreview(calcShape.value);
+
+// ensure pointer events active
+document.body.style.pointerEvents = 'auto';
+qsa('button').forEach(b=> b.style.pointerEvents = 'auto');
+
+/* expose regenerate for debug */
+window.geomath = { regenQuiz: genQuiz, saveQuiz: saveQuiz, loadQuiz: loadQuiz };
+
+</script>
+
+</body>
+</html>
+
+
